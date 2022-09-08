@@ -1,0 +1,43 @@
+name: Code Quality Analysis
+
+on:
+  push: 
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  NODEJS_VERSION: 10.x
+  CODE_TYPE: javascript
+
+jobs:
+  code-analysis:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Setup Node.Js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODEJS_VERSION }}
+    - name: Install Dependencies
+      run: npm install
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ env.CODE_TYPE }}
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+    - name: Snyk Scan for Vulnerabilities
+      uses: snyk/actions@0.3.0
+      with:
+        command: monitor
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        
+
